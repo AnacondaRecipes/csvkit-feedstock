@@ -34,7 +34,7 @@ build:
     - sql2csv = csvkit.utilities.sql2csv:launch_new_instance
 
 requirements:
-  build:
+  host:
     - python
     - setuptools
 
