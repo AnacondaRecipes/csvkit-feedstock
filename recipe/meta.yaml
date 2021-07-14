@@ -63,6 +63,7 @@ test:
     - csvstat --help
     - in2csv --help
     - sql2csv --help
+    - pip check
 
 about:
   home: https://csvkit.rtfd.org/
