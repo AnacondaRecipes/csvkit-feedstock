@@ -47,6 +47,9 @@ test:
     - csvkit
     - csvkit.convert
     - csvkit.utilities
+   
+  requires:
+    - pip  
 
   commands:
     - csvclean --help
