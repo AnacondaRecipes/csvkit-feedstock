@@ -1,16 +1,18 @@
-{% set version = "1.0.5" %}
+{% set name = "csvkit" %}
+{% set version = "2.2.0" %}
 
 package:
-  name: csvkit
+  name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/c/csvkit/csvkit-{{ version }}.tar.gz
-  sha256: 7bd390f4d300e45dc9ed67a32af762a916bae7d9a85087a10fd4f64ce65fd5b9
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 147318a8dbaec07c0bbb9291c14b78de5fa32ed3d4a5c2396e52a83c0a30df6b
 
 build:
   number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+  skip: true  # [py<310]
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
   entry_points:
     - csvclean = csvkit.utilities.csvclean:launch_new_instance
     - csvcut = csvkit.utilities.csvcut:launch_new_instance
@@ -29,24 +31,38 @@ build:
 
 requirements:
   host:
-    - python
     - pip
-
-  run:
     - python
     - setuptools
-    - agate >=1.6.1
-    - agate-excel >=0.2.2
-    - agate-dbf >=0.2.0
-    - agate-sql >=0.5.3
-    - six >=1.6.1
+    - wheel
+  run:
+    - python
+    - agate >=1.12.0
+    - agate-excel >=0.4.0
+    - agate-dbf >=0.2.3
+    - agate-sql >=0.7.0
+    - openpyxl
+    - sqlalchemy
+    - xlrd
+
+{% set ignore_tests = "" %}
+{% set ignore_tests = ignore_tests + " --deselect=tests/test_utilities/test_csvstat.py::TestCSVStat::test_decimal_format" %}
+# AssertionError: Lists differ: ['\ufefffoo', 'bar', 'baz'] != ['foo', 'bar', 'baz']
+{% set ignore_tests = ignore_tests + " --deselect=tests/test_utilities/test_csvclean.py::TestCSVClean::test_removes_bom" %}   # [win]
+{% set ignore_tests = ignore_tests + " --deselect=tests/test_utilities/test_csvgrep.py::TestCSVGrep::test_match_utf8_bom" %}  # [win]
+{% set ignore_tests = ignore_tests + " --deselect=tests/test_utilities/test_csvlook.py::TestCSVLook::test_unicode_bom" %}     # [win]
 
 test:
+  source_files:
+    - tests
+    - examples
   imports:
     - csvkit
     - csvkit.convert
     - csvkit.utilities
-
+  requires:
+    - pip
+    - pytest
   commands:
     - csvclean --help
     - csvcut --help
@@ -62,15 +78,18 @@ test:
     - csvstat --help
     - in2csv --help
     - sql2csv --help
+    - pip check
+    - pytest -v tests {{ ignore_tests }}
 
 about:
-  home: https://csvkit.rtfd.org/
+  home: https://csvkit.rtfd.org
   license_file: COPYING
   license: MIT
   license_family: MIT
   summary: 'A suite of command-line tools for working with CSV, the king of tabular file formats.'
+  description: 'A suite of command-line tools for working with CSV, the king of tabular file formats.'
   dev_url: https://github.com/wireservice/csvkit
-  doc_url: https://csvkit.rtfd.org/
+  doc_url: https://csvkit.rtfd.org
 
 extra:
   recipe-maintainers:
